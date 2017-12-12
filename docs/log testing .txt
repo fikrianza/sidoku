@@ -1,0 +1,272 @@
+LOG TESTING;
+
+@Author Izzan Dienurrahman
+==============================
+
+C:\xampp\htdocs\dms\application\controllers\admin
+user.php
+-----------------
+function add() dan edit()
+
+huruf y-m-d -> Y-m-d
+
+*formatting tahun agar diterima postgre
+
+
+C:\xampp\htdocs\dms\application\libraries
+login_helper.php
+------------------
+		if($_SESSION['status']==false)
+		{
+			redirect('admin/suspend');
+		}
+
+*biar admin tidak ke suspend sebelum false notasinya angka nol
+
+C:\xampp\htdocs\dms\application\models\admin
+surat_model.php
+--------------------
+LINE 212
+yg bener kyk gini:
+select extract (MONTH from (select waktu from tes where id = 1));
+*untuk select yang lain tinggal ganti MONTH nya aja jadi YEAR atau lainnya
+https://www.postgresql.org/docs/9.1/static/functions-datetime.html
+
+Code sementara yang working:
+  public function selectJumlahSuratPerBulanByAdmin()
+  {
+    $year = date('Y');
+    $this->db->select('COUNT(id_surat) as c, (select extract (MONTH from (created_date))) AS bulan');
+    $this->db->from('master_surat');
+    $this->db->where('(select extract (YEAR from (created_date))) =' ,$year);
+    $this->db->group_by('(select extract (MONTH from (created_date)))');
+    $query = $this->db->get();
+    return $query->result();
+  }
+
+C:\xampp\htdocs\dms\application\controllers\admin
+profile.php
+line 53
+'update_date'  => date('Y-m-d H:i:s')
+*y kecil diganti Y kapital agar bisa edit Nama lengkap. sudah tidak error.
+
+
+C:\xampp\htdocs\dms\application\controllers\admin
+jenis_surat.php
+----------------------
+line 65
+'created_date'	=> date('Y-m-d H:m:s'),
+line 67
+'update_date'	=> date('Y-m-d H:m:s')
+line 103
+'update_date'	=> date('Y-m-d H:m:s')
+*y kecil diganti Y kapital agar bisa menambah dan mengedit jenis surat. keduanya sudah tidak error.
+
+C:\xampp\htdocs\dms\application\controllers\admin\
+Profile.php
+-----------------
+line 88
+'update_date'  => date('Y-m-d H:i:s')
+*y kecil diganti Y kapital agar bisa edit password. sudah tidak error.
+
+NOTES (UDAH SOLVED)
+----------------- 
+FATAL = Hapus user berhasil di tampilan saja, di database belum terhapus hanya is_deleted saja yang jadi true. & user admin BISA menghapus dirinya sendiri
+
+C:\xampp\htdocs\dms\application\views\admin\content\user
+view.php
+-----------------------
+line 80-81
+yang bener kyk gini biar status aktif / tidak aktifnya benar.
+<?php if($x->status=='f'){echo "<span class='label label-warning'> Tidak Aktif </span>";} ?>
+<?php if($x->status=='t'){echo "<span class='label label-success'> Aktif </span>";} ?> 
+
+C:\xampp\htdocs\dms\application\models\admin
+user_model.php
+-------------------
+LINE 133
+tambahin 
+$this->db->where('master_user.id_role <>',1);
+biar admin gk bisa edit datanya sendiri/ takutnya kehapus
+
+C:\xampp\htdocs\dms\application\views\admin\content\user
+detail.php
+-----------------
+line 68-69
+harusnya 
+<?php if($x->status=='t'){echo "<span class='label label-success'> Aktif </span>";} ?>
+<?php if($x->status=='f'){echo "<span class='label label-warning'> Tidak Aktif </span>";} ?>
+
+C:\xampp\htdocs\dms\application\models\admin
+Role_model.php
+---------------------
+tambah
+$this->db->where('level<>',0);
+pada line 31 agar master tidak bisa menambah master lain.
+
+C:\xampp\htdocs\dms\application\views\admin\content\surat
+disposisi.php
+--------------
+line 100 - 101 harusnya seperti ini
+<?php if($new_list_disposisi->is_read=='f')
+<?php if($new_list_disposisi->is_read=='t')
+agar status disposisi sudah terbaca/belum menjadi benar
+
+C:\xampp\htdocs\dms\application\views\admin\content\surat
+add.php
+-----------------
+line 109 harusnya
+<input type="number" min="0" class="form-control" placeholder="lampiran" name="jumlah_lampiran" >
+
+line 75 harusnya
+<input type="number" min="1" class="form-control" placeholder="Nomor Urut Surat" name="no_urut_surat" required>
+
+
+C:\xampp\htdocs\dms\application\views\admin\content\surat
+edit.php
+-----------------
+line 132 harusnya
+<input type="number" min="0" class="form-control" placeholder="lampiran" name="jumlah_lampiran" value="<?php echo $new_list_surat->jumlah_lampiran ?>">    
+
+
+C:\xampp\htdocs\dms\application\views\admin\content
+home.php
+-------------
+line 152 harusnya kyk gini
+$v=0;
+                      foreach($jumlah_surat_per_bulan as $x)
+                      {
+                        $v++;
+                        $jumlah_surat =  $jumlah_surat . $x->c . ",";
+                        $bulan =  $bulan . "'".$months[$x->bulan]."'" . ",";
+                        $bgColor =  $bgColor . "'".$bgColorArray[$x->bulan]."'" . ",";
+                      }
+                      if($v!=0)
+                      {
+                        $jumlah_surat =  $jumlah_surat . "0";
+                        $bulan = $bulan . "'".$months[($x->bulan)+1]."'";
+                        $bgColor = $bgColor . "'".$bgColorArray[($x->bulan)+1]."'";
+                      }
+                      //echo $bulan; 
+reseptionist sudah tidak error pada dashboard
+
+C:\xampp\htdocs\dms\application\controllers\admin
+Surat.php
+-----------------
+line 312 harusnya seperti ini
+public function disposisi_inbox()
+	{
+		if($_SESSION['level']=='0'||
+			 $_SESSION['level']=='1'||
+			 $_SESSION['level']=='5')
+			{
+				$_SESSION['error_message']="Anda tidak memiliki hak akses ini";
+				redirect('admin');
+			}
+agar resepsionis muncul warning message hak akses ke fitur disposisi
+
+C:\xampp\htdocs\dms\application\views\admin\content
+sidebar.php
+----------------
+masalah naming disposisi harusnya jadi kyk gini
+line 60
+<li><a href="<?php echo base_url('admin/surat/disposisi') ?>"><i class="fa fa-circle-o"></i> Lihat Surat Terdisposisi</a></li>
+
+C:\xampp\htdocs\dms\application\models\admin
+Surat_model.php
+----------------------------
+line 34 harusnya kyk gini
+$this->db->where('id_surat',$data_disposisi['id_surat']);
+*sebelumnya typo "idisposisi"
+
+C:\xampp\htdocs\dms\application\views\admin\content\surat
+disposisi_inbox.php / disposisi_keuangan.php
+------------------------
+line 105 - 106 / 108-109 
+>is_read=='f')
+>is_read=='t')
+
+C:\xampp\htdocs\dms\application\views\admin\content
+home_master.php
+--------------------
+line 73 jadi spt ini
+<a href="<?php echo base_url('admin/surat/disposisi_keuangan') ?>">
+
+UNSOLVED
+-order surat belum bisa descending
+-jumlah disposisi surat masuk gk sinkron sama aslinya
+-duplikat entri surat terdisposisi ketika target penerima diganti
+-asmanum status disposisi akan terus belum dibaca hingga koor pemegang uang muka bisa lihat detail disposisi suratnya
+-admin tidak ada warning akses ketika klik fitur verifikasi keuangan (SOLVED)
+
+
+========================
+START TESTING REVISION 2
+========================
+C:\xampp\htdocs\dms\application\models\admin
+Surat_model.php
+-----------------------
+yang benar seperti ini
+line 273 
+$this->db->select('SUM(nominal_uang) as c ,  (select extract (MONTH from (created_date))) AS bulan');
+
+line 275
+$this->db->where('(select extract (YEAR from (created_date))) = ' ,$year);
+
+line 286
+$this->db->select('SUM(nominal_uang) as c ,  (select extract (YEAR from (created_date))) AS tahun');
+
+saveEdit() jadi spt ini
+if ($this->db->trans_status() === TRUE)
+      {
+        $this->db->set($data_disposisi);
+        $this->db->where('id_surat',$data_disposisi['id_surat']);
+        $this->db->where('id_user_pengirim',$data_disposisi['id_user_pengirim']);
+        $this->db->update('relasi_disposisi');
+        $_SESSION['success_message'] = "Berhasil edit data";
+      }
+
+
+C:\xampp\htdocs\dms\application\views\admin\content\surat
+disposisi.php
+----------------------
+line 103-104 true falsenya kebalik menyebabkan surat yang sudah dibaca malah belum, begitu juga sebaliknya
+<?php if($new_list_disposisi->is_read=='f'){echo "<span class='label label-default'><i class='fa fa-eye'></i> Belum dibaca</span>";} ?>
+<?php if($new_list_disposisi->is_read=='t'){echo "<span class='label label-info'><i class='fa fa-eye'></i> Telah dibaca</span>";} ?>
+
+C:\xampp\htdocs\dms\application\models\admin
+Disposisi_model.php
+----------------------
+yang benar seperti ini agar pembacaan inbox yang belum dibaca menjadi sesuai:
+line 97
+public function getNotReadMessage()
+  {
+    $this->db->select('COUNT(id_surat) as c');
+	$this->db->from(' (select "master_surat"."no_urut_surat", "relasi_disposisi".*, "master_user"."nama", "master_user"."username", "master_surat"."kode_surat", "master_status_keuangan"."nama_status_keuangan" FROM "relasi_disposisi" JOIN "master_user" ON "relasi_disposisi"."id_user_pengirim" = "master_user"."id_user" JOIN "master_surat" ON "relasi_disposisi"."id_surat" = "master_surat"."id_surat" JOIN "master_status_keuangan" ON "relasi_disposisi"."id_status_keuangan" = "master_status_keuangan"."id_status_keuangan" WHERE "id_user_penerima" = '.$_SESSION['id_user'].' ORDER BY "created_date" DESC) as filtered WHERE is_read = false');
+    $query = $this->db->get();
+    return $query->result();
+  }
+
+
+C:\xampp\htdocs\dms\application\libraries
+Login_helper.php
+------------------
+line 18 harusnya seperti ini
+
+if( $_SESSION['status']=='f')
+
+agar akun yang telah di nonaktifkan tidak bisa login
+
+
+CURRENT ISSUE (MINOR):
+-saveEdit double warning
+-koor pemegang uang muka hanya bisa verif keuangan sebagai ganti dari fitur lihat surat terdisposisi sekaligus verifikasi,maka dari itu
+sebaiknya diberikan warning hak akses pada menu bar lihat surat terdisposisi.
+-konfirmasi keuangan hanya support angka saja, tidak ada koma atau titik yang bisa diinput (padahal memudahkan pembacaan angka) dan juga
+format mata uang tidak ada sehingga tidak jelas apakah mata uang tersebut dalam IDR atau USD atau lainnya.
+-background homepage pada resolusi device testing 1920 x 1080 (full HD) memberikan gambar yang putus-sambung
+
+POSITIF FEEDBACK:
+-asmanum sudah bisa dapat jawaban akan dibaca/belumnya surat dari koor pemegang uang muka.
+-input tanggalan saat membuat form surat jauh lebih mudah dari versi 1.
+

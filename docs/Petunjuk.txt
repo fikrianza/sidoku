@@ -1,0 +1,5 @@
+pada 'user manual.pdf' sudah termasuk query insert dan struktur table pada postgre, artinya sudah lengkap.
+
+'log testing.txt' adalah log proses testing selama aplikasi dibangun
+
+query_insert.txt dan query_updated.txt adalah command postgre untuk membuat struktur tabel dan menginisiasi default inputnya (meskipun sudah ada di user manual.pdf)

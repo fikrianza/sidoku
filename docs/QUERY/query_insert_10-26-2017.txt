@@ -1,0 +1,68 @@
+MASTER JENIS SURAT
+----------------------
+INSERT INTO master_jenis_surat (
+nama_jenis_surat,
+created_by,
+update_by,
+update_date)
+VALUES
+('Biasa',1,1,'9-27-2017'),
+('Rahasia',1,1,'9-27-2017'),
+('Penting',1,1,'9-27-2017'),
+('Sangat Penting',1,1,'9-27-2017'),
+('Sangat_Rahasia',1,1,'9-27-2017');
+
+MASTER KEASLIAN SURAT
+----------------------
+INSERT INTO master_keaslian_surat(
+nama_keaslian_surat)
+VALUES
+('Asli'),
+('Tembusan');
+
+MASTER ROLE
+---------------
+INSERT INTO master_role(
+level,
+nama_role,
+parent_role,
+created_by,
+update_by,
+update_date)
+VALUES
+(0,'master',0,0,0,'8-13-2017'),
+(1,'reseptionist',0,1,1,'8-13-2017'),
+(2,'dekan',0,1,1,'8-13-2017'),
+(2,'wakil dekan I',0,1,1,'8-13-2017'),
+(2,'wakil dekan II',0,0,0,'8-13-2017'),
+(3,'manager umum',0,0,0,'8-13-2017'),
+(4,'asisten manager Umum',0,0,0,'8-13-2017'),
+(5,'koor pemegang uang muka',0,0,0,'8-13-2017');
+
+MASTER STATUS KEUANGAN
+-----------------------
+INSERT INTO master_status_keuangan(
+nama_status_keuangan)
+VALUES
+('Tidak ada'),
+('Verifikasi'),
+('Pembuatan SPP'),
+('Proses Rektorat'),
+('Selesai');
+
+MASTER USER
+------------
+INSERT INTO master_user(
+id_role,
+nama,
+username,
+password,
+nip,
+email,
+status,
+is_deleted,
+created_by,
+update_by,
+update_date)
+VALUES
+(1,'admin','admin','admin',1122,'arvinchristian9@gmail.com',true,false,0,1,'8-13-2017');

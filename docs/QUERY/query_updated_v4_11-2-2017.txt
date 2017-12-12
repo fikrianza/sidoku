@@ -1,0 +1,90 @@
+
+MASTER JENIS SURAT
+-------------------
+CREATE TABLE master_jenis_surat(
+id_jenis_surat SERIAL UNIQUE NOT NULL PRIMARY KEY,
+nama_jenis_surat varchar(50) NOT NULL,
+created_by int NOT NULL,
+created_date TIMESTAMP NOT NULL default now()::timestamp(0),
+update_by int NOT NULL,
+update_date TIMESTAMP NOT NULL);
+
+MASTER KEASLIAN SURAT
+----------------------
+CREATE TABLE master_keaslian_surat(
+id_keaslian_surat SERIAL UNIQUE NOT NULL PRIMARY KEY,
+nama_keaslian_surat varchar(25) NOT NULL);
+
+MASTER ROLE
+---------------
+CREATE TABLE master_role (
+id_role SERIAL UNIQUE NOT NULL PRIMARY KEY,
+level int NOT NULL,
+nama_role varchar(50) UNIQUE NOT NULL,
+parent_role int NOT NULL,
+created_by int NOT NULL,
+created_date TIMESTAMP NOT NULL default now()::timestamp(0),
+update_by int NOT NULL,
+update_date TIMESTAMP NOT NULL);
+
+MASTER STATUS KEUANGAN
+-----------------------
+CREATE TABLE master_status_keuangan(
+id_status_keuangan SERIAL UNIQUE NOT NULL PRIMARY KEY,
+nama_status_keuangan varchar(25) NOT NULL);
+
+MASTER SURAT
+--------------------
+CREATE TABLE master_surat(
+id_surat SERIAL UNIQUE NOT NULL PRIMARY KEY,
+id_jenis_surat int NOT NULL,
+id_keaslian_surat int NOT NULL,
+no_urut_surat int NOT NULL,
+perihal_surat varchar(200) NOT NULL,
+jumlah_lampiran int NOT NULL,
+asal_surat varchar(200) NOT NULL,
+tujuan_surat varchar(200) NOT NULL,
+kode_surat varchar(25) NOT NULL,
+tanggal_pembuatan_surat DATE NOT NULL,
+tanggal_terima_surat DATE NOT NULL,
+deskripsi_surat text NOT NULL,
+status BOOLEAN NOT NULL,	
+created_by int NOT NULL,
+created_date TIMESTAMP NOT NULL default now()::timestamp(0),
+update_by int NOT NULL,
+update_date TIMESTAMP NOT NULL);
+
+MASTER USER
+----------------
+CREATE TABLE master_user (
+id_user SERIAL UNIQUE NOT NULL PRIMARY KEY,
+id_role int NOT NULL,
+nama varchar(50) NOT NULL,
+username varchar(50) UNIQUE NOT NULL,
+password varchar(50) NOT NULL,
+nip varchar(20) UNIQUE NOT NULL,
+email varchar(50) UNIQUE NOT NULL,
+status BOOLEAN NOT NULL,
+is_deleted BOOLEAN NOT NULL,
+created_by int NOT NULL,
+created_date TIMESTAMP NOT NULL default now()::timestamp(0),
+update_by int NOT NULL,
+update_date TIMESTAMP NOT NULL);
+
+RELASI DISPOSISI
+------------------
+CREATE TABLE relasi_disposisi(
+id_disposisi SERIAL UNIQUE NOT NULL PRIMARY KEY,
+id_user_pengirim int NOT NULL,
+id_user_penerima int NOT NULL,
+id_status_keuangan int NOT NULL,
+id_surat int NOT NULL,
+deskripsi text NOT NULL,
+is_approve BOOLEAN NOT NULL,
+is_read BOOLEAN NOT NULL,
+nominal_uang int,
+deskripsi_keuangan text,
+created_by int NOT NULL,
+created_date TIMESTAMP NOT NULL default now()::timestamp(0),
+update_by int NOT NULL,
+update_date TIMESTAMP NOT NULL);

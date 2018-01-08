@@ -24,7 +24,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 //$config['base_url'] = 'http://dms-arvinchristian996062.codeanyapp.com/dms';
-$config['base_url'] = 'http://upma.fia.ui.ac.id';
+$config['base_url'] = 'http://sidoku.fia.ui.ac.id/';
 /*
 |--------------------------------------------------------------------------
 | Index File
@@ -53,6 +53,7 @@ $config['index_page'] = 'index.php';
 | WARNING: If you set this to 'PATH_INFO', URIs will always be URL-decoded!
 */
 $config['uri_protocol']	= 'REQUEST_URI';
+//$config['uri_protocol']	= 'AUTO';
 
 /*
 |--------------------------------------------------------------------------
